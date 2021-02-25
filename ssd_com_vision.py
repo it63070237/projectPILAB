@@ -46,6 +46,8 @@ for hei in range(2, height-1):
 
 im_color_down[:-u, :-v, 1] = down_shape_green[u:, v:, 0]
 print(u, v)
+u_green = u * 4
+v_green = v * 4
 
 u, v, ssd_now = 0, 0, 10
 for hei in range(2, height-1):
@@ -60,6 +62,19 @@ for hei in range(2, height-1):
 
 im_color_down[:-u, :-v, 0] = down_shape_blue[u:, v:, 0]
 print(u, v)
+u_blue = u * 4
+v_blue = v * 4
+
+sz_test = red.shape
+print(sz_test)
+height = int(sz_test[0])
+width = sz_test[1]
+im_color = np.zeros((height, width, 3), dtype=np.uint8)
+
+im_color[:, :, 2] = red[:, :, 0]
+im_color[:-u_green, :-v_green, 1] = green[u_green:, v_green:, 0]
+im_color[:-u_blue, :-v_blue, 0] = blue[u_blue:, v_blue:, 0]
 
 cv2.imshow('test', im_color_down)
+cv2.imshow('real', im_color)
 cv2.waitKey(0)
