@@ -27,9 +27,9 @@ im_color_slide = np.zeros((height, width, 3), dtype=np.uint8)
 im_color_slide[:, :, 2] = red[:, :, 0]
 
 u, v, ssd_now = 0, 0, 10
-for hei in range(-50, 50, 1):
-    for wid in range(-50, 50, 1):
-        test_window = im_color
+for hei in range(-15, 15, 1):
+    for wid in range(-15, 15, 1):
+        test_window = im_color.copy()
         test_window[:, :, 1] = green[(height//2)-50+hei:(height//2)+50+hei, (width//2)-50+wid:(width//2)+50+wid, 0]
         if ssd(test_window[:, :, 2], test_window[:, :, 1]) < ssd_now:
             ssd_now = ssd(test_window[:, :, 2], test_window[:, :, 1])
@@ -46,13 +46,13 @@ elif u <= 0 and v > 0:
 elif u > 0 and v <= 0:
     im_color_slide[u:, :width - abs(v), 1] = green[:height-abs(u), abs(v):, 0]
 elif u > 0 and v > 0:
-    im_color_slide[u:, v:, 1] = green[:height-abs(u), :width-abs(v), 0]
+    im_color_slide[:-u, :-v, 1] = green[u:, v:, 0]
 
 
 u, v, ssd_now = 0, 0, 10
-for hei in range(-50, 50, 1):
-    for wid in range(-50, 50, 1):
-        test_window = im_color
+for hei in range(-15, 15, 1):
+    for wid in range(-15, 15, 1):
+        test_window = im_color.copy()
         test_window[:, :, 0] = blue[(height//2)-50+hei:(height//2)+50+hei, (width//2)-50+wid:(width//2)+50+wid, 0]
         if ssd(test_window[:, :, 2], test_window[:, :, 0]) < ssd_now:
             ssd_now = ssd(test_window[:, :, 2], test_window[:, :, 0])
@@ -63,13 +63,13 @@ cv2.imshow('test2', test_window)
 print(ssd_now)
 print('ans2 : ',u ,v)
 if u <= 0 and v <= 0:
-    im_color_slide[:height-abs(u), :width-abs(v), 0] = blue[abs(u):, abs(v):, 0]
+    im_color_slide[abs(u):, abs(v):, 0] = blue[:u, :v, 0]
 elif u <= 0 and v > 0:
     im_color_slide[:height - abs(u), v:, 0] = blue[abs(u):, :width-abs(v), 0]
 elif u > 0 and v <= 0:
     im_color_slide[u:, :width - abs(v), 0] = blue[:height-abs(u), abs(v):, 0]
 elif u > 0 and v > 0:
-    im_color_slide[u:, v:, 0] = blue[:height-abs(u), :width-abs(v), 0]
+    im_color_slide[:-u, :-v, 1] = green[u:, v:, 0]
 
 cv2.imshow('real', im_color_slide)
 cv2.waitKey(0)
