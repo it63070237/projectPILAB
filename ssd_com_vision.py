@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-def ssd(img1, img2):
+def ssd(img2, img1):
     return float(np.sqrt(float(np.sum((np.array(img1).flatten()-np.array(img2).flatten())**2))))/(img1.shape[0]*img1.shape[1])
 
 
@@ -9,72 +9,67 @@ red = cv2.imread('red.jpg')
 green = cv2.imread('green.jpg')
 blue = cv2.imread('blue.jpg')
 
-red = red[100:1000, 100:1050]
-blue = blue[100:1000, 100:1050]
-green = green[100:1000, 100:1050]
+red = red[33:1033, 94:1094]
+blue = blue[32:1033, 94:1094]
+green = green[33:1033, 94:1094]
 
-down_shape_red = red.copy()
-for i in range(2):
-    down_shape_red = cv2.pyrDown(down_shape_red)
-
-down_shape_green = green.copy()
-for i in range(2):
-    down_shape_green = cv2.pyrDown(down_shape_green)
-
-down_shape_blue = blue.copy()
-for i in range(2):
-    down_shape_blue = cv2.pyrDown(down_shape_blue)
-
-sz_test = down_shape_red.shape
-print(sz_test)
-height = int(sz_test[0])
-width = sz_test[1]
-
-im_color_down = np.zeros((height, width, 3), dtype=np.uint8)
-im_color_down[:, :, 2] = down_shape_red[:, :, 0]
-
-u, v, ssd_now = 0, 0, 10
-for hei in range(2, height-1):
-    for wid in range(2, width-1):
-        test_window = im_color_down.copy()
-        ali = down_shape_green.copy()
-        test_window[:-hei, :-wid, 1] = ali[hei:, wid:, 0]
-        if ssd(test_window[:-hei, :-wid, 2], test_window[:-hei, :-wid, 1]) < ssd_now:
-            ssd_now = ssd(test_window[:-hei, :-wid, 2], test_window[:-hei, :-wid, 1])
-            u = hei
-            v = wid
-
-im_color_down[:-u, :-v, 1] = down_shape_green[u:, v:, 0]
-print(u, v)
-u_green = u * 4
-v_green = v * 4
-
-u, v, ssd_now = 0, 0, 10
-for hei in range(2, height-1):
-    for wid in range(2, width-1):
-        test_window = im_color_down.copy()
-        ali = down_shape_blue.copy()
-        test_window[:-hei, :-wid, 1] = ali[hei:, wid:, 0]
-        if ssd(test_window[:-hei, :-wid, 2], test_window[:-hei, :-wid, 1]) < ssd_now:
-            ssd_now = ssd(test_window[:-hei, :-wid, 2], test_window[:-hei, :-wid, 1])
-            u = hei
-            v = wid
-
-im_color_down[:-u, :-v, 0] = down_shape_blue[u:, v:, 0]
-print(u, v)
-u_blue = u * 4
-v_blue = v * 4
 
 sz_test = red.shape
-print(sz_test)
+print(red.shape)
+print(blue.shape)
+print(green.shape)
 height = int(sz_test[0])
 width = sz_test[1]
-im_color = np.zeros((height, width, 3), dtype=np.uint8)
 
-im_color[:, :, 2] = red[:, :, 0]
-im_color[:-u_green, :-v_green, 1] = green[u_green:, v_green:, 0]
-im_color[:-u_blue, :-v_blue, 0] = blue[u_blue:, v_blue:, 0]
+im_color = np.zeros((100, 100, 3), dtype=np.uint8)
+im_color[:, :, 2] = red[(height//2)-50:(height//2)+50, (width//2)-50:(width//2)+50, 0]
+im_color_slide = np.zeros((height, width, 3), dtype=np.uint8)
+im_color_slide[:, :, 2] = red[:, :, 0]
 
-cv2.imshow('test', im_color_down)
-cv2.imshow('real', im_color)
+u, v, ssd_now = 0, 0, 10
+for hei in range(-50, 50, 1):
+    for wid in range(-50, 50, 1):
+        test_window = im_color
+        test_window[:, :, 1] = green[(height//2)-50+hei:(height//2)+50+hei, (width//2)-50+wid:(width//2)+50+wid, 0]
+        if ssd(test_window[:, :, 2], test_window[:, :, 1]) < ssd_now:
+            ssd_now = ssd(test_window[:, :, 2], test_window[:, :, 1])
+            u = hei
+            v = wid
+
+cv2.imshow('test1', test_window)
+print(ssd_now)
+print('ans1 : ',u ,v)
+if u <= 0 and v <= 0:
+    im_color_slide[:height-abs(u), :width-abs(v), 1] = green[abs(u):, abs(v):, 0]
+elif u <= 0 and v > 0:
+    im_color_slide[:height - abs(u), v:, 1] = green[abs(u):, :width-abs(v), 0]
+elif u > 0 and v <= 0:
+    im_color_slide[u:, :width - abs(v), 1] = green[:height-abs(u), abs(v):, 0]
+elif u > 0 and v > 0:
+    im_color_slide[u:, v:, 1] = green[:height-abs(u), :width-abs(v), 0]
+
+
+u, v, ssd_now = 0, 0, 10
+for hei in range(-50, 50, 1):
+    for wid in range(-50, 50, 1):
+        test_window = im_color
+        test_window[:, :, 0] = blue[(height//2)-50+hei:(height//2)+50+hei, (width//2)-50+wid:(width//2)+50+wid, 0]
+        if ssd(test_window[:, :, 2], test_window[:, :, 0]) < ssd_now:
+            ssd_now = ssd(test_window[:, :, 2], test_window[:, :, 0])
+            u = hei
+            v = wid
+
+cv2.imshow('test2', test_window)
+print(ssd_now)
+print('ans2 : ',u ,v)
+if u <= 0 and v <= 0:
+    im_color_slide[:height-abs(u), :width-abs(v), 0] = blue[abs(u):, abs(v):, 0]
+elif u <= 0 and v > 0:
+    im_color_slide[:height - abs(u), v:, 0] = blue[abs(u):, :width-abs(v), 0]
+elif u > 0 and v <= 0:
+    im_color_slide[u:, :width - abs(v), 0] = blue[:height-abs(u), abs(v):, 0]
+elif u > 0 and v > 0:
+    im_color_slide[u:, v:, 0] = blue[:height-abs(u), :width-abs(v), 0]
+
+cv2.imshow('real', im_color_slide)
 cv2.waitKey(0)
